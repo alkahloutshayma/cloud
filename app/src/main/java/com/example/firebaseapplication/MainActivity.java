@@ -20,7 +20,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.firebaseapplication.Model.StudentModel;
+import com.example.firebaseapplication.Model.EmployeeModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     RadioButton partTime,fullTime;
 
     Uri userPhotoUri;
-    StudentModel studentModel;
+    EmployeeModel employeeModel;
     private static final int IMAGE_PICK_CODE = 1000;
     private static final int PERMISSION_CODE = 1001;
 
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
         fireStoreDB = FirebaseFirestore.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
-        studentModel = new StudentModel();
+        employeeModel = new EmployeeModel();
 
         userName = findViewById(R.id.tvUserName);
         avgEd = findViewById(R.id.edAvarg);
@@ -99,9 +99,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
     private void checkData() {
         String name = userName.getText().toString();
-        String avg = avgEd.getText().toString();
+        String sal = avgEd.getText().toString();
 
         loadingLY.setVisibility(View.VISIBLE);
         boolean hasError = false;
@@ -110,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             userName.setError(this.getString(R.string.invalid_input));
             hasError = true;
         }
-        if (avg.isEmpty()) {
+        if (sal.isEmpty()) {
             avgEd.setError(this.getString(R.string.invalid_input));
             hasError = true;
         }
@@ -120,12 +121,12 @@ public class MainActivity extends AppCompatActivity {
         if (hasError)
             return;
 
-        studentModel.name = name;
-        studentModel.average = Double.parseDouble(avg);
+        employeeModel.name = name;
+        employeeModel.salary = Double.parseDouble(sal);
         if(partTime.isChecked()){
-            studentModel.jobTime ="PartTime";
-        }else {
-            studentModel.jobTime ="FullTime";
+            employeeModel.jobTime ="PartTime";
+        }else if(fullTime.isChecked()){
+            employeeModel.jobTime ="FullTime";
         }
         uploadPhoto(userPhotoUri);
 
@@ -149,8 +150,8 @@ public class MainActivity extends AppCompatActivity {
 
             imgRef.getDownloadUrl().addOnCompleteListener(task -> {
 
-                studentModel.photo = task.getResult().toString();
-                Log.e("s",studentModel.photo);
+                employeeModel.photo = task.getResult().toString();
+                Log.e("s", employeeModel.photo);
 //                System.out.println("Log uploaded url " + studentModel.getphoto());
                 addUserToFirebase();
             });
@@ -165,10 +166,10 @@ public class MainActivity extends AppCompatActivity {
 
         Map<String, Object> studentModelMap = new HashMap<>();
         studentModelMap.put("id", userId);
-        studentModelMap.put("name", studentModel.name);
-        studentModelMap.put("average", studentModel.average);
-        studentModelMap.put("photo", studentModel.photo);
-        studentModelMap.put("jobTime", studentModel.jobTime);
+        studentModelMap.put("name", employeeModel.name);
+        studentModelMap.put("salary", employeeModel.salary);
+        studentModelMap.put("photo", employeeModel.photo);
+        studentModelMap.put("jobTime", employeeModel.jobTime);
 
         fireStoreDB.collection(Constants.USER).document(userId).set(studentModelMap, SetOptions.merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {

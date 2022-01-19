@@ -16,9 +16,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.firebaseapplication.Adapter.StudentAdapter;
-import com.example.firebaseapplication.Dialogs.UpdateStudentDialog;
-import com.example.firebaseapplication.Model.StudentModel;
+import com.example.firebaseapplication.Adapter.EmployeeAdapter;
+import com.example.firebaseapplication.Dialogs.UpdateEmployeeDialog;
+import com.example.firebaseapplication.Model.EmployeeModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -34,13 +34,13 @@ public class AllEmployeeActivity extends AppCompatActivity {
 
     ProgressBar loadingLY;
     RecyclerView rv;
-    ArrayList<StudentModel> studentModelsList;
-    StudentAdapter adapter;
-    StudentModel studentModel;
+    ArrayList<EmployeeModel> employeeModelsList;
+    EmployeeAdapter adapter;
+    EmployeeModel employeeModel;
 
     FirebaseFirestore fireStoreDB;
 
-    UpdateStudentDialog updateStudentDialog;
+    UpdateEmployeeDialog updateEmployeeDialog;
     ActivityResultLauncher<Intent> pickImageLauncher;
 
     @Override
@@ -52,7 +52,7 @@ public class AllEmployeeActivity extends AppCompatActivity {
 
         rv = findViewById(R.id.recyclerView);
         loadingLY = findViewById(R.id.loadingLY);
-        studentModelsList = new ArrayList<>();
+        employeeModelsList = new ArrayList<>();
 
         rv.setLayoutManager(new LinearLayoutManager(this));
 
@@ -65,8 +65,8 @@ public class AllEmployeeActivity extends AppCompatActivity {
                                 Intent intent = result.getData();
                                 Uri selectedImageUri = intent.getData();
 
-                                if (updateStudentDialog != null) {
-                                    updateStudentDialog.setPhotoUri(selectedImageUri);
+                                if (updateEmployeeDialog != null) {
+                                    updateEmployeeDialog.setPhotoUri(selectedImageUri);
                                 }
 
                             } catch (Exception e) {
@@ -77,27 +77,27 @@ public class AllEmployeeActivity extends AppCompatActivity {
                     }
                 });
 
-        adapter = new StudentAdapter(this, studentModelsList, new DataCallBack() {
+        adapter = new EmployeeAdapter(this, employeeModelsList, new DataCallBack() {
             @Override
             public void Result(Object obj, String type, Object otherData) {
-                studentModel = (StudentModel) obj;
+                employeeModel = (EmployeeModel) obj;
                 int position = (int) otherData;
 
-                if (updateStudentDialog == null) {
-                    updateStudentDialog = new UpdateStudentDialog(AllEmployeeActivity.this, studentModel, new DataCallBack() {
+                if (updateEmployeeDialog == null) {
+                    updateEmployeeDialog = new UpdateEmployeeDialog(AllEmployeeActivity.this, employeeModel, new DataCallBack() {
                         @Override
                         public void Result(Object obj, String type, Object otherData) {
 
                             if (type.equals(Constants.PICK_IMAGE)) {
                                 checkPermission();
                             } else {
-                                studentModel = (StudentModel) obj;
-                                adapter.dataList.set(position, studentModel);
+                                employeeModel = (EmployeeModel) obj;
+                                adapter.dataList.set(position, employeeModel);
                                 adapter.notifyItemChanged(position);
                             }
                         }
                     });
-                    updateStudentDialog.setOnDismissListener(dialog -> updateStudentDialog = null);
+                    updateEmployeeDialog.setOnDismissListener(dialog -> updateEmployeeDialog = null);
                 }
             }
 
@@ -122,13 +122,13 @@ public class AllEmployeeActivity extends AppCompatActivity {
 
                 if (task.isSuccessful()) {
 
-                    studentModelsList.clear();
+                    employeeModelsList.clear();
 
                     for (DocumentSnapshot document : task.getResult().getDocuments()) {
-                        StudentModel studentModel = document.toObject(StudentModel.class);
-                        studentModelsList.add(studentModel);
+                        EmployeeModel employeeModel = document.toObject(EmployeeModel.class);
+                        employeeModelsList.add(employeeModel);
                     }
-                    adapter.dataList = studentModelsList;
+                    adapter.dataList = employeeModelsList;
                     adapter.notifyDataSetChanged();
 
                 } else {

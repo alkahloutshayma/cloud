@@ -2,7 +2,6 @@ package com.example.firebaseapplication.Dialogs;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -16,7 +15,7 @@ import androidx.annotation.NonNull;
 import com.bumptech.glide.Glide;
 import com.example.firebaseapplication.Constants;
 import com.example.firebaseapplication.DataCallBack;
-import com.example.firebaseapplication.Model.StudentModel;
+import com.example.firebaseapplication.Model.EmployeeModel;
 import com.example.firebaseapplication.R;
 import com.example.firebaseapplication.databinding.DialogUpdateStudentBinding;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -30,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class UpdateStudentDialog extends Dialog {
+public class UpdateEmployeeDialog extends Dialog {
 
     Activity activity;
     int holidayCount;
@@ -39,10 +38,10 @@ public class UpdateStudentDialog extends Dialog {
     FirebaseFirestore fireStoreDB;
     StorageReference storageRef;
 
-    StudentModel studentModel;
+    EmployeeModel employeeModel;
     DataCallBack okCall;
 
-    public UpdateStudentDialog(Activity context, StudentModel student, final DataCallBack okCall) {
+    public UpdateEmployeeDialog(Activity context, EmployeeModel student, final DataCallBack okCall) {
         super(context);
         activity = context;
 
@@ -52,7 +51,7 @@ public class UpdateStudentDialog extends Dialog {
         binding = DialogUpdateStudentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        studentModel = student;
+        employeeModel = student;
         this.okCall = okCall;
         fireStoreDB = FirebaseFirestore.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
@@ -61,15 +60,15 @@ public class UpdateStudentDialog extends Dialog {
 //        progressDialog = new ProgressDialog(activity);
 //        progressDialog.setMessage(activity.getString(R.string.edit_student));
 
-        binding.tvUserName.setText(studentModel.name);
-        binding.edAvarg.setText(String.valueOf(studentModel.average));
-        holidayCount = Integer.parseInt(studentModel.holiday);
-        binding.holiday.setText(studentModel.holiday);
+        binding.tvUserName.setText(employeeModel.name);
+        binding.edAvarg.setText(String.valueOf(employeeModel.salary));
+        holidayCount = Integer.parseInt(employeeModel.holiday);
+        binding.holiday.setText(employeeModel.holiday);
 
-        if (studentModel.photo != null) {
+        if (employeeModel.photo != null) {
             Glide.with(activity)
                     .asBitmap()
-                    .load(studentModel.photo)
+                    .load(employeeModel.photo)
                     .into(binding.updatProfileImg);
         }
 //            setPhotoUri(Uri.parse(studentModel.photo));
@@ -78,8 +77,8 @@ public class UpdateStudentDialog extends Dialog {
             @Override
             public void onClick(View view) {
                 holidayCount++;
-                studentModel.holiday = String.valueOf(holidayCount);
-                binding.holiday.setText(studentModel.holiday);
+                employeeModel.holiday = String.valueOf(holidayCount);
+                binding.holiday.setText(employeeModel.holiday);
             }
         });
 
@@ -102,9 +101,9 @@ public class UpdateStudentDialog extends Dialog {
             if (hasError)
                 return;
 
-            studentModel.name = userNameStr;
-            studentModel.average = Double.parseDouble(avrgStr);
-            studentModel.holiday = String.valueOf(holidayCount);
+            employeeModel.name = userNameStr;
+            employeeModel.salary = Double.parseDouble(avrgStr);
+            employeeModel.holiday = String.valueOf(holidayCount);
 
             if (updatProfileImgeUri != null) {
                 uploadPhoto(updatProfileImgeUri);
@@ -165,8 +164,8 @@ public class UpdateStudentDialog extends Dialog {
 
             imgRef.getDownloadUrl().addOnCompleteListener(task -> {
 
-                studentModel.photo = task.getResult().toString();
-                Log.i("s", "Log photo " + studentModel.photo);
+                employeeModel.photo = task.getResult().toString();
+                Log.i("s", "Log photo " + employeeModel.photo);
                 updateStudentData();
 //                System.out.println("Log uploaded url " + studentModel.getphoto());
                 binding.loadingLY.setVisibility(View.GONE);
@@ -179,14 +178,14 @@ public class UpdateStudentDialog extends Dialog {
     private void updateStudentData() {
 
         Map<String, Object> studentMap = new HashMap<>();
-        studentMap.put("id", studentModel.id);
-        studentMap.put("name", studentModel.name);
-        studentMap.put("photo", studentModel.photo);
-        studentMap.put("average", studentModel.average);
-        studentMap.put("holiday", studentModel.holiday);
+        studentMap.put("id", employeeModel.id);
+        studentMap.put("name", employeeModel.name);
+        studentMap.put("photo", employeeModel.photo);
+        studentMap.put("average", employeeModel.salary);
+        studentMap.put("holiday", employeeModel.holiday);
 
 //        progressDialog.show();
-        fireStoreDB.collection(Constants.USER).document(studentModel.id)
+        fireStoreDB.collection(Constants.USER).document(employeeModel.id)
                 .update(studentMap)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     //                    progressDialog.d
@@ -197,7 +196,7 @@ public class UpdateStudentDialog extends Dialog {
                         dismiss();
 
                         if (okCall != null) {
-                            okCall.Result(studentModel, "", null);
+                            okCall.Result(employeeModel, "", null);
                         }
                     }
                 })
